@@ -1,0 +1,18 @@
+version: '2.0'
+services:
+  jenkins:
+    image: 'jenkins/jenkins:lts'
+    restart: always
+    hostname: 'jenkins'
+    volumes:
+      - '/data/docker/volumes/jenkins:/var/jenkins_home'
+    networks:
+      static-network:
+        ipv4_address: 172.21.128.1
+
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
+          ip_range: 172.28.5.0/24

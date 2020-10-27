@@ -1,0 +1,52 @@
+version: '2.0'
+services:
+  web:
+    image: '187wuopo.mirror.aliyuncs.com/gitlab/gitlab-ce:latest'
+    restart: always
+    hostname: 'gitlab.weiguyun.com'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.weiguyun.com'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+        # Add any other gitlab.rb configuration here, each on its own line
+
+        # ssl 配置
+        nginx['ssl_certificate'] = "/etc/gitlab/ssl/fullchain.pem"
+        nginx['ssl_certificate_key'] = "/etc/gitlab/ssl/privkey.pem"
+
+        # Email 配置
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = "smtp.exmail.qq.com"
+        gitlab_rails['smtp_port'] = 465
+        gitlab_rails['smtp_user_name'] = "info@weiguyun.com"
+        gitlab_rails['smtp_password'] = "Mike2020"
+        gitlab_rails['smtp_authentication'] = "login"
+        gitlab_rails['smtp_enable_starttls_auto'] = true
+        gitlab_rails['smtp_tls'] = true
+        gitlab_rails['smtp_domain'] = "exmail.qq.com"
+        gitlab_rails['gitlab_email_from'] = "info@weiguyun.com"
+        gitlab_rails['gitlab_email_reply_to'] = "noreply@weiguyun.com"
+
+        # 禁用用户创建组的权限
+        gitlab_rails['gitlab_default_can_create_group'] = false
+
+        # 修改 worker_processes
+        unicorn['worker_processes'] = 2
+    ports:
+      - '2224:22'
+    volumes:
+      - '/data/docker/volumes/gitlab/config:/etc/gitlab' # For storing application data
+      - '/data/docker/volumes/gitlab/logs:/var/log/gitlab' # For storing logs
+      - '/data/docker/volumes/gitlab/data:/var/opt/gitlab' # For storing the GitLab configuration files
+      # - '/etc/letsencrypt/live/gitlab.weiguyun.com:/etc/gitlab/gitlab.weiguyun.com' # letsencrypt 生成的是软连接。。。映射不了
+      # - $(pwd)/gitlab.rb:/etc/gitlab/gitlab.rb # 想映射一个配置文件，但好像实现不了
+    networks:
+      static-network:
+        ipv4_address: 172.20.128.2
+
+networks:
+  static-network:
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+          ip_range: 172.28.5.0/24
