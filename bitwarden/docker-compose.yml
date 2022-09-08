@@ -6,3 +6,5 @@ services:
       - "13883:80"
     volumes:
       - /data/bitwarden:/data
+    environment:
+      - SIGNUPS_ALLOWED=false
